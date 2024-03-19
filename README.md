@@ -1,4 +1,4 @@
-# PHPCalendar
+# PHP-Calendar
 First Basic Current Calendar
 
 TEAM
