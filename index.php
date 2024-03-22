@@ -1,88 +1,79 @@
 <!DOCTYPE html>
-<?php
-// Connecting to DataBase
-$db = mysqli_connect('localhost', 'yeray', 'reboot', 'ToDo');
-// server, db user, password, database
-
-$errors = '';
-
-if (isset($_POST['submit'])) {
-    $task = $_POST['task'];
-    if (empty($task)) {
-        $errors = 'You must fill in with a task!';
-    } else {
-        mysqli_query($db, "INSERT INTO tasks (task) VALUES ('$task')"); // table "tasks", column "task"
-        header('location: index.php');
-        exit; // Add exit to prevent further execution
-    }
-}
-
-if (isset($_GET['del_task'])) {
-    $id = $_GET['del_task'];
-    mysqli_query($db, "DELETE FROM tasks WHERE id=$id");
-    header('location: index.php');
-}
-
-$tasks = mysqli_query($db, "SELECT * FROM tasks");
-
-// Prints errors (debugging)           ini_set('display_errors', 1);  
-//                                       error_reporting(E_ALL);
-?>
-
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToDo List</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+    
+    <title>CALENDAR PHP</title>
 
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
 
-    <div class="container">
-        <h2 style="color: darkblue">ToDo List with PHP & MySql</h2>
+    <div class="background"></div>
+
+    <div class="calendar-container">
+
+        <h1>CALENDAR PHP</h1>
+
+        <?php
+
+/*      F	A full textual representation of a month, such as January or March
+        m	Numeric representation of a month, with leading zeros
+        M	A short textual representation of a month, three letters
+        n	Numeric representation of a month, without leading zeros*/
+
+        // Call the current year and month and storage it 
+        $currentYear = date("Y");
+        $currentMonth = date("n");
+
+        // In each month, we need the number of days
+        $daysInMonth = date("t", mktime(0, 0, 0, $currentMonth, 1, $currentYear));
+
+        // Get the day of the week the first day of month falls on
+        $firstDayOfWeek = date("n", mktime(0, 0, 0, $currentMonth, 1, $currentYear));
+
+        // Calendar table 
+        echo "<table border='1'>";
+        echo "<tr><th colspan='7'>" . date("F Y") . "</th></tr>";
+        echo "<tr>
+        <th>Mon</th>
+            <th>Tue</th>
+                <th>Wed</th>
+                    <th>Thu</th>
+                        <th>Fri</th>
+                            <th>Sat</th>
+                                <th>Sun</th>
+                                    </tr>";
+
+        // First row 
+        echo "<tr>";
+
+        // Filling in blank cells before the first days of the month
+        for ($i = 1; $i < $firstDayOfWeek; $i++) {
+            echo "<td>&nbsp;</td>";
+        }
+
+        // Filling in the days of the month
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            // Also have to start a row at the beginning of each week
+            if (($day + $firstDayOfWeek - 1) % 7 == 1) {
+                echo "</tr><tr>";
+            }
+            echo "<td>$day</td>";
+        }
+
+        // Filling in blank cells at the end of the month
+        for ($i = 1; ($i <= (7 - ($firstDayOfWeek + $daysInMonth - 1) % 7) % 7); $i++) {
+            echo "<td>&nbsp;</td>";
+        }
+
+        echo "</tr>";
+        echo "</table>";
+
+        ?>
     </div>
 
-    <form method="POST" action="index.php">
-        <div class="input-container">
-            <?php if (isset($errors)) { ?>
-                <p><?php echo $errors; ?></p>
-            <?php } ?>
-            <input type="text" name="task" class="input">
-        </div>
-        <button type="submit" name="submit" class="btn">Submit</button>
-    </form>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Number</th>
-                <th>Task to do</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <?php $i = 1;
-            while ($row = mysqli_fetch_array($tasks)) { ?>
-
-                <tr>
-                    <td><?php echo $i; ?></td>
-                    <td class="Phrase"><?php echo $row['task']; ?></td>
-                    <td class="del">
-                        <a href="index.php?del_task=<?php echo $row['id']; ?>">X</a>
-                    </td>
-                </tr>
-
-            <?php $i++;
-            } ?>
-
-        </tbody>
-    </table>
-
 </body>
-
 </html>
